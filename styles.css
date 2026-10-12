@@ -1,0 +1,1589 @@
+/* ============ 基础 ============ */
+/* 首页标题专用手写体（用户上传，本地自托管，无外链 CDN） */
+@font-face {
+  font-family: "TitleHand";
+  src: url("assets/fonts/PingFangLiuAngLeTianTi.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+/* 正文字体「郑庆科黄油体」（用户上传，本地自托管，无外链 CDN） */
+@font-face {
+  font-family: "ButterQK";
+  src: url("assets/fonts/ZhengQingKeHuangYouTi.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  --bg: #F7F4EF;
+  --card-bg: #FFFDF8;
+  --text: #1E1C1A;
+  --text-2: #6F6A63;
+  --accent: #D9483B;
+  --soft-red: #F5D8D2;
+  --gold: #C7A56A;
+  --green: #7A8B72;
+  --line: #E9E3DA;
+  --mask: rgba(20, 18, 17, 0.58);
+
+  --font-serif: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --font-sans: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* 展示字（粉笔感）：优先手写体，缺失时回退思源宋体 + SVG 粉笔滤镜 */
+  --font-chalk: "Ma Shan Zheng", "LXGW WenKai", "LXGW WenKai TC", "Kaiti SC", "STKaiti", "Baoli SC", "KaiTi", "SimKai", "KaiTi_GB2312", "楷体", "华文楷体", "Source Han Serif SC", "Noto Serif SC", serif;
+  /* 首页「心愿卡」标题：用户上传的手写体优先，缺失再回退粉笔字栈 */
+  --font-title-hand: "TitleHand", "Ma Shan Zheng", "LXGW WenKai", "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Source Han Serif SC", serif;
+  /* 正文/按钮：用户上传的「郑庆科黄油体」优先 */
+  --font-butter: "ButterQK", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+
+  --chalk-ink: #262321;
+  --chalk-dust: #E7E0D2;
+
+  --ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 全站背景：用户提供的暖调光影纹理（相对路径，静态资源） */
+body {
+  background-image:
+    linear-gradient(rgba(247, 244, 239, .25), rgba(247, 244, 239, .25)),
+    url("assets/bg.jpg");
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: fixed, fixed;
+}
+/* 灵感来源页：底图压暗，保证白字可读（仅此页生效） */
+body.insp-active {
+  background-image:
+    linear-gradient(rgba(23, 15, 10, .46), rgba(23, 15, 10, .46)),
+    url("assets/bg.jpg");
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+textarea, input { font-family: inherit; color: inherit; }
+.hidden { display: none !important; }
+
+/* ============ 视图切换 ============ */
+.view { display: none; min-height: 100dvh; }
+.view.is-active { display: block; }
+
+/* ============ 全站返回按钮 ============ */
+.site-back {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 95;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 4px;
+  font-size: 14px;
+  letter-spacing: .02em;
+  color: #6F6A63;
+  transition: color .18s var(--ease), transform .18s var(--ease);
+}
+.site-back:hover { color: #1E1C1A; transform: translateX(1px); }
+/* 灵感来源页：深色底上返回/跳过改白字 */
+body.insp-active .site-back { color: #FFFFFF; text-shadow: 0 1px 8px rgba(30, 18, 12, .5); }
+body.insp-active .site-back:hover { color: rgba(255, 255, 255, .72); }
+
+/* ============ 背景音乐开关（页面正上方居中） ============ */
+.bgm-toggle {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 97;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6F6A63;
+  opacity: .85;
+  transition: color .18s var(--ease), opacity .18s var(--ease), transform .18s var(--ease);
+}
+.bgm-toggle:hover { opacity: 1; transform: translateX(-50%) scale(1.06); }
+.bgm-toggle .icon-off { display: none; }
+.bgm-toggle.is-off .icon-on { display: none; }
+.bgm-toggle.is-off .icon-off { display: block; }
+/* 深色底页面（灵感来源）改白字 */
+body.insp-active .bgm-toggle { color: #FFFFFF; }
+
+
+/* ============ 启动页 ============ */
+#view-launch { display: none; }
+#view-launch.is-active { display: flex; align-items: center; justify-content: center; }
+
+.launch-inner {
+  width: 100%;
+  max-width: 640px;
+  padding: 40px 28px;
+  text-align: center;
+}
+
+/* ===== 首页标题：粉笔字 + 擦除显现 ===== */
+.brand-wrap { display: block; }
+.brand-title {
+  width: min(380px, 80vw);
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  overflow: visible;
+}
+.brand-text {
+  fill: url(#titleGrad);
+  font-family: var(--font-title-hand);
+  font-size: 74px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+.brand-dust-text {
+  fill: var(--chalk-dust);
+  font-family: var(--font-title-hand);
+  font-size: 74px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  opacity: 1;
+}
+.brand-grain-layer { opacity: .1; }
+.brand-halo { opacity: .16; }
+.brand-underline {
+  stroke: var(--gold);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: .9;
+}
+
+/* 擦除：不改字，只让粉笔灰从左向右被擦掉（总时长 2s） */
+#dustEraser { animation: chalkWipe 1.7s cubic-bezier(.42,.05,.32,.98) forwards; }
+#showEraser { animation: chalkWipe 1.7s cubic-bezier(.42,.05,.32,.98) forwards; }
+@keyframes chalkWipe {
+  from { transform: translateX(0); }
+  to   { transform: translateX(520px); }
+}
+/* 擦除完成后，残留粉笔灰在最后 300ms 自然淡出 */
+.brand-dust-layer { animation: dustResidual 2s linear forwards; }
+@keyframes dustResidual {
+  0%, 85% { opacity: 1; }
+  100%    { opacity: 0; }
+}
+.brand-grain-layer { animation: grainAway 2s linear forwards; }
+@keyframes grainAway {
+  0%, 85% { opacity: .1; }
+  100%    { opacity: 0; }
+}
+
+.launch-sub {
+  margin-top: 18px;
+  color: #FFFFFF;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 3px rgba(52, 34, 26, .6), 0 0 10px rgba(52, 34, 26, .3);
+}
+
+.launch-actions {
+  margin-top: 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+
+/* ============ 郑庆科黄油体应用范围 ============
+   范围：首页副标题 + 首页按钮；全站「返回」「跳过」；
+   灵感来源页全部文案（三句主标题「作为送礼人 / 作为收礼人 /
+   被一篇真诚的种草笔记打动后，你也会犹豫吗？」除外，保持粉笔字）。
+   体验页保持原字体，不受影响。 */
+.launch-sub,
+.launch-actions .btn,
+#site-back,
+#insp-skip,
+#view-inspiration .act-sub,
+#view-inspiration .act-line,
+#view-inspiration .act-lead,
+#view-inspiration .act-purpose,
+#view-inspiration .act-ai,
+#view-inspiration .fig-word,
+#view-inspiration .bubble-text,
+#view-inspiration .q-mark text,
+#view-inspiration .btn {
+  font-family: var(--font-butter);
+}
+
+/* ============ 按钮 ============ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  height: 48px;
+  padding: 0 28px;
+  border-radius: 24px;
+  font-size: 16px;
+  letter-spacing: 1px;
+  transition: transform .14s var(--ease), box-shadow .14s var(--ease), filter .14s var(--ease), background .14s var(--ease);
+}
+.btn:active { transform: translateY(1px) scale(.98); }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(217, 72, 59, .22);
+}
+.btn-primary:hover { transform: translateY(-1px); filter: brightness(1.02); box-shadow: 0 8px 22px rgba(217, 72, 59, .28); }
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+.btn-secondary:hover { transform: translateY(-1px); background: var(--card-bg); }
+.btn-block { width: 100%; }
+
+/* ============ 首页两个按钮：毛玻璃透明质感（仅启动页） ============ */
+.launch-actions .btn {
+  color: var(--text);
+  background: rgba(255, 253, 248, .22);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, .5);
+  box-shadow: 0 8px 26px rgba(70, 45, 30, .14), inset 0 1px 0 rgba(255, 255, 255, .6);
+  transition: transform .14s var(--ease), box-shadow .14s var(--ease), background .14s var(--ease), border-color .14s var(--ease);
+}
+.launch-actions .btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, .34);
+  border-color: rgba(255, 255, 255, .72);
+  box-shadow: 0 12px 30px rgba(70, 45, 30, .18), inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+/* 主按钮（开始体验）：主色淡透的毛玻璃，保留 CTA 存在感 */
+.launch-actions .btn.btn-primary {
+  background: rgba(217, 72, 59, .62);
+  border-color: rgba(255, 255, 255, .4);
+  color: #FFFFFF;
+  box-shadow: 0 8px 26px rgba(217, 72, 59, .22), inset 0 1px 0 rgba(255, 255, 255, .45);
+}
+.launch-actions .btn.btn-primary:hover {
+  background: rgba(217, 72, 59, .74);
+  border-color: rgba(255, 255, 255, .6);
+  filter: none;
+  box-shadow: 0 12px 30px rgba(217, 72, 59, .3), inset 0 1px 0 rgba(255, 255, 255, .5);
+}
+/* 不支持 backdrop-filter 时的降级：用不透明底色保证可读 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .launch-actions .btn { background: rgba(255, 253, 248, .86); }
+  .launch-actions .btn.btn-primary { background: var(--accent); }
+}
+
+/* ============ 灵感来源页 · 四幕动画 ============ */
+#view-inspiration.is-active { display: block; }
+.insp-stage {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 84px 24px 96px;
+}
+.skip-btn {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 96;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  font-size: 14px;
+  color: #FFFFFF;
+  text-shadow: 0 1px 8px rgba(30, 18, 12, .5);
+  transition: color .18s var(--ease), opacity .18s var(--ease);
+}
+.skip-btn:hover { opacity: .72; }
+
+.act { display: none; width: 100%; max-width: 720px; text-align: center; }
+.act.is-active { display: block; }
+/* 前三幕：左画面 · 右文字 */
+.act.is-active:not(.act-final) {
+  display: grid;
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+  align-items: center;
+  column-gap: 44px;
+  max-width: 1000px;
+  text-align: left;
+}
+.act.is-active:not(.act-final) .act-figure { margin-bottom: 0; }
+.act.is-active:not(.act-final) .fig-words { justify-content: flex-start; }
+/* 第一幕三个标签整体右移 */
+#insp-stage article[data-act="1"] .fig-words { margin-left: 32px; }
+/* 第三幕：第三个标签右移，水平居中于上两个标签中间 */
+#insp-stage article[data-act="3"] .fig-word:nth-child(3) { margin-left: 84px; }
+/* 第二幕：第三个标签右移，居中于上两标签接缝（chip宽210/157/135 + gap10 → 215-67.5≈148） */
+#insp-stage article[data-act="2"] .fig-words-2 .fig-word:nth-child(3) { margin-left: 104px; }
+.act.is-active:not(.act-final) .act-title-q { margin: 0; }
+.act.is-active:not(.act-final) .act-continue { grid-column: 1 / -1; justify-self: center; margin-top: 32px; }
+/* 每幕整体淡入 + 轻微上移 */
+.act.is-active { animation: actIn .42s var(--ease) both; }
+@keyframes actIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.act-figure { margin-bottom: 26px; }
+.fig-svg { width: 340px; max-width: 88%; height: auto; overflow: visible; }
+.fig-svg .ink { fill: none; stroke: rgba(255, 255, 255, .88); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.fig-svg .ink.thin { stroke-width: 1.6; opacity: .7; }
+.fig-svg .accent { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.fig-svg .q-mark text { fill: rgba(255, 255, 255, .55); opacity: .8; font-family: var(--font-chalk); font-size: 24px; }
+.fig-svg .bubble-text { fill: rgba(255, 255, 255, .95); font-family: var(--font-sans); font-size: 15px; }
+
+.fig-words { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 16px; }
+.fig-word {
+  font-family: var(--font-chalk);
+  font-size: 17px;
+  color: rgba(255, 255, 255, .95);
+  opacity: 0;
+  padding: 5px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .12);
+  border: 1px dashed rgba(255, 255, 255, .4);
+  text-shadow: 0 1px 6px rgba(30, 18, 12, .4);
+}
+.fig-words-2 .fig-word,
+.fig-words-3 .fig-word { font-size: 15px; }
+.act.is-active .fig-svg { animation: figIn .55s var(--ease) .2s both; }
+.act.is-active .fig-word { animation: figIn .55s var(--ease) both; }
+.act.is-active .fig-word:nth-child(1) { animation-delay: .55s; }
+.act.is-active .fig-word:nth-child(2) { animation-delay: .78s; }
+.act.is-active .fig-word:nth-child(3) { animation-delay: 1.01s; }
+@keyframes figIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.act-copy { margin-bottom: 30px; }
+.act-title {
+  font-family: var(--font-title-hand);
+  font-size: 44px;
+  font-weight: 400;
+  letter-spacing: .04em;
+  color: #FFFFFF;
+  line-height: 1.15;
+  text-shadow: 0 2px 12px rgba(30, 18, 12, .5);
+}
+.act-title .ch { display: inline-block; opacity: 0; transform: translateY(8px); }
+.act.is-active .act-title .ch {
+  animation: chIn .5s var(--ease) both;
+  animation-delay: calc(var(--i) * 60ms + .4s);
+}
+@keyframes chIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.act-title-lg { font-size: 52px; margin-top: 8px; }
+/* 第三幕：整句问句作主标题（较长，字号收小；逐字延迟缩短避免拖沓） */
+.act-title-q { font-size: 30px; line-height: 1.55; max-width: 640px; margin: 0 auto; }
+.act.is-active .act-title-q .ch { animation-delay: calc(var(--i) * 26ms + .4s); }
+.act-sub { font-size: 16px; color: rgba(255, 255, 255, .96); margin-top: 10px; opacity: 0; text-shadow: 0 1px 4px rgba(18, 11, 7, .8), 0 2px 16px rgba(18, 11, 7, .55); }
+.act-line { font-size: 16px; line-height: 1.75; color: rgba(255, 255, 255, .9); margin-top: 8px; opacity: 0; text-shadow: 0 1px 4px rgba(18, 11, 7, .8), 0 2px 16px rgba(18, 11, 7, .55); }
+.act-lead { font-size: 18px; color: rgba(255, 255, 255, .9); opacity: 0; text-shadow: 0 1px 4px rgba(18, 11, 7, .8), 0 2px 16px rgba(18, 11, 7, .55); }
+.act-purpose { font-family: var(--font-chalk); font-size: 20px; color: rgba(255, 255, 255, .92); margin-top: 18px; opacity: 0; text-shadow: 0 1px 4px rgba(18, 11, 7, .8), 0 2px 16px rgba(18, 11, 7, .55); }
+.act-ai { font-size: 13px; line-height: 1.7; color: rgba(255, 255, 255, .72); margin-top: 20px; opacity: 0; max-width: 560px; margin-left: auto; margin-right: auto; text-shadow: 0 1px 6px rgba(30, 18, 12, .4); }
+
+.act.is-active .act-sub { animation: figIn .55s var(--ease) 1s both; }
+/* 每段正文按其在幕内的顺序逐个淡入（--d 由 HTML 指定，避免 nth-of-type 跨幕错位） */
+.act.is-active .act-line { animation: figIn .55s var(--ease) var(--d, 1.5s) both; }
+.act.is-active .act-lead { animation: figIn .55s var(--ease) .3s both; }
+.act.is-active .act-purpose { animation: figIn .55s var(--ease) 1.15s both; }
+.act.is-active .act-ai { animation: figIn .55s var(--ease) 1.55s both; }
+
+.act-continue { min-width: 160px; opacity: 0; }
+.act.is-active .act-continue { animation: figIn .55s var(--ease) 1.9s both; }
+
+.act-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; opacity: 0; }
+.act.is-active .act-actions { animation: figIn .55s var(--ease) 1.85s both; }
+.act-actions .btn { min-width: 150px; }
+
+.act-dots {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 96;
+}
+.act-dots .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background .24s var(--ease), width .24s var(--ease);
+}
+.act-dots .dot.is-on { width: 18px; border-radius: 4px; background: var(--accent); }
+
+/* 启动页淡入（标题走擦除显现，见上方 brand 区块） */
+#view-launch.is-active .launch-sub { opacity: 0; animation: riseIn .5s var(--ease) forwards; animation-delay: .9s; }
+#view-launch.is-active .launch-actions { opacity: 0; animation: riseIn .5s var(--ease) forwards; animation-delay: 1s; }
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ 双视角 ============ */
+#view-experience.is-active { display: block; height: 100dvh; overflow: hidden; }
+
+.role-switch {
+  display: none;
+}
+
+.dual {
+  display: flex;
+  height: 100dvh;
+  width: 100%;
+}
+
+.panel {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  transition: filter .32s var(--ease), transform .32s var(--ease), opacity .32s var(--ease);
+}
+
+.divider {
+  width: 1px;
+  background: var(--line);
+}
+
+/* ============ 手机壳（悬浮毛玻璃） ============ */
+.phone {
+  --ph: calc(min(844px, 100dvh - 56px) * .95);
+  position: relative;
+  height: var(--ph);
+  width: calc(var(--ph) * 390 / 844);
+  background: rgba(255, 253, 248, .6);
+  backdrop-filter: blur(22px) saturate(165%);
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
+  border-radius: 30px;
+  box-shadow:
+    0 24px 64px rgba(30, 28, 26, .28),
+    0 6px 18px rgba(30, 28, 26, .12),
+    inset 0 1px 0 rgba(255, 255, 255, .75),
+    inset 0 0 0 1px rgba(255, 255, 255, .4);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-butter); /* 聊天面板文字统一用郑庆科黄油体 */
+}
+@supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
+  .phone { background: rgba(255, 253, 248, .94); }
+}
+
+.phone-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, .38);
+  border-bottom: 1px solid rgba(233, 227, 218, .5);
+}
+.phone-title { font-size: 15px; font-weight: 600; flex: 1 1 auto; min-width: 0; }
+.ic-btn {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text);
+  border-radius: 8px;
+}
+.ic-btn svg { width: 20px; height: 20px; }
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; color: #fff;
+  flex: 0 0 auto;
+}
+.avatar-min { background: linear-gradient(135deg, #E9B1A9, #D9483B); }
+.avatar-jie { background: linear-gradient(135deg, #B4A28A, #7A6B53); }
+
+.phone-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.phone-body::-webkit-scrollbar { width: 0; height: 0; }
+
+.phone-foot {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  background: rgba(255, 255, 255, .38);
+  border-top: 1px solid rgba(233, 227, 218, .5);
+}
+/* 功能栏：一行快捷入口（心愿卡 / 表情等） */
+.quick-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  min-width: 0;
+}
+.quick-bar::-webkit-scrollbar { display: none; }
+.quick-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 13px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, .8);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.quick-pill .em { font-style: normal; font-size: 15px; line-height: 1; }
+/* 输入栏：语音 + 输入框 + 表情 + 加号 */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 10px;
+}
+.tool { width: 34px; height: 34px; }
+.input-box {
+  flex: 1 1 auto;
+  height: 44px;
+  border-radius: 22px;
+  background: rgba(247, 244, 239, .72);
+  border: 1px solid rgba(233, 227, 218, .8);
+  padding: 0 16px;
+  display: flex; align-items: center;
+  min-width: 0;
+}
+.input-box input {
+  width: 100%; border: none; outline: none; background: transparent;
+  font-size: 15px;
+  font-family: inherit;
+}
+.input-box input:disabled { color: var(--text-2); }
+
+.tool-card {
+  display: flex; align-items: center; gap: 4px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 15px;
+  background: var(--soft-red);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.tool-card svg { width: 16px; height: 16px; }
+
+/* 心愿卡入口引导弹窗：文案“点击尝试”，微微放大缩小 */
+.try-tip {
+  position: absolute;
+  left: 14px;
+  top: -48px;
+  z-index: 6;
+  padding: 5px 11px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 6px 16px rgba(30, 28, 26, .16);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  transform-origin: 16px 100%;
+  animation: tryPulse 1.6s ease-in-out infinite;
+}
+.try-tip::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  bottom: -5px;
+  width: 9px;
+  height: 9px;
+  background: var(--card-bg);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+@keyframes tryPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* ============ 消息气泡 ============ */
+.msg { display: flex; width: 100%; gap: 8px; align-items: flex-start; }
+.msg.in { justify-content: flex-start; }
+.msg.out { justify-content: flex-end; }
+/* 气泡旁的圆头像（CSS 伪元素，按视角显示“敏/杰”） */
+.msg.in::before, .msg.out::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  margin-top: 4px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 28px;
+  text-align: center;
+}
+#panel-ajie .msg.in::before,
+#panel-xiaomin .msg.out::after {
+  content: "敏";
+  background: linear-gradient(135deg, #E9B1A9, #D9483B);
+}
+#panel-ajie .msg.out::after,
+#panel-xiaomin .msg.in::before {
+  content: "杰";
+  background: linear-gradient(135deg, #B4A28A, #7A6B53);
+}
+.bubble {
+  max-width: 78%;
+  padding: 12px 14px;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+.msg.in .bubble {
+  background: rgba(255, 255, 255, .92);
+  color: var(--text);
+  border-top-left-radius: 6px;
+  box-shadow: 0 2px 10px rgba(30, 28, 26, .08);
+}
+.msg.out .bubble {
+  background: rgba(245, 216, 210, .88);
+  color: var(--text);
+  border-top-right-radius: 6px;
+  box-shadow: 0 2px 10px rgba(30, 28, 26, .06);
+}
+
+/* 种草笔记分享卡片气泡 */
+.note-bubble { width: 218px; padding: 10px 10px 12px; border-radius: 14px; }
+.note-bubble .note-src { font-size: 11px; color: var(--text-2); }
+.note-bubble .note-title { font-size: 14px; font-weight: 600; margin-top: 2px; line-height: 1.4; }
+.note-bubble .note-pic {
+  height: 84px;
+  margin-top: 8px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #E8B9B0 0%, #D9483B 55%, #C7A56A 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.note-bubble .note-pic svg { width: 40px; height: 40px; }
+.note-bubble .note-from {
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: rgba(247, 244, 239, .72);
+  border-radius: 8px;
+  font-size: 11px;
+  color: var(--text-2);
+}
+/* 收到分享后的快捷回复小条（仅阿杰视角出现） */
+.quick-replies {
+  display: flex;
+  gap: 8px;
+  padding: 0 0 0 36px;
+  flex: 0 0 auto;
+}
+.qr-chip {
+  padding: 4px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .75);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.sys-note {
+  align-self: center;
+  font-size: 12px;
+  color: var(--text-2);
+  padding: 4px 12px;
+  background: rgba(30, 28, 26, .05);
+  border-radius: 12px;
+}
+
+/* 心愿卡气泡里的信封小图（用户素材：心形蝴蝶结 + 信封样式） */
+.card-bubble { width: 200px; padding: 8px; }
+.card-note { font-size: 11px; color: var(--text-2); margin-top: 8px; text-align: center; }
+.card-note-2 { font-size: 11px; color: var(--text-2); margin-top: 3px; text-align: center; }
+.btn-open { width: 100%; min-width: 0; height: 36px; margin-top: 10px; font-size: 13px; }
+
+/* 信封（牛皮纸 + 封口盖 + 蜡封 + 邮票 + 邮戳） */
+.envelope {
+  position: relative;
+  width: 176px;
+  height: 112px;
+  background: #EBDCBB;
+  border: 1px solid #D8C49A;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(30, 28, 26, .1);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.env-flap {
+  position: absolute;
+  top: -1px; left: -1px; right: -1px;
+  height: 58px;
+  background: linear-gradient(180deg, #E7D3A6, #E2CDA0);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  z-index: 1;
+}
+.env-stamp {
+  position: absolute;
+  top: 7px; right: 10px;
+  width: 30px; height: 36px;
+  background: rgba(255, 253, 248, .92);
+  border: 1px solid #C9B183;
+  border-radius: 3px;
+  padding: 3px;
+  transform: rotate(6deg);
+  z-index: 2;
+}
+.env-stamp img { width: 100%; height: 100%; object-fit: contain; }
+.env-postmark {
+  position: absolute;
+  top: 6px; right: 34px;
+  width: 38px; height: 38px;
+  border: 1.5px solid rgba(154, 78, 66, .38);
+  border-radius: 50%;
+  transform: rotate(-12deg);
+  z-index: 2;
+}
+.env-body {
+  position: absolute;
+  left: 12px; right: 12px; bottom: 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 3;
+}
+.env-to { font-family: var(--font-title-hand); font-size: 11px; color: #7A6B53; }
+.env-title { font-family: var(--font-title-hand); font-size: 12px; color: var(--accent); letter-spacing: 1px; }
+.env-seal {
+  position: absolute;
+  left: 50%; top: 44px;
+  transform: translateX(-50%);
+  width: 34px; height: 33px;
+  filter: drop-shadow(0 2px 3px rgba(30, 28, 26, .28));
+  z-index: 4;
+}
+
+/* 抽屉支付阶段的大号信封（预览形态） */
+.env-lg { width: 240px; height: 154px; }
+.env-lg .env-flap { height: 80px; }
+.env-lg .env-stamp { top: 10px; right: 14px; width: 40px; height: 48px; }
+.env-lg .env-postmark { top: 9px; right: 47px; width: 52px; height: 52px; }
+.env-lg .env-body { left: 16px; right: 16px; bottom: 13px; }
+.env-lg .env-to { font-size: 14px; }
+.env-lg .env-title { font-size: 15px; }
+.env-lg .env-seal { width: 46px; height: 44px; top: 62px; }
+
+/* 已发送（阿杰聊天页）：去掉右上角爱心邮票，信封略靠右 */
+.env-sent .env-stamp { display: none; }
+/* 支付预览大信封 & 小敏收到未点开：同样去掉爱心邮票 */
+.env-lg .env-stamp, .env-recv .env-stamp { display: none; }
+.msg.out .card-bubble .envelope { margin-left: auto; }
+
+/* ============ 抽屉支付阶段的信封预览容器 ============ */
+#preview-card {
+  display: flex;
+  justify-content: center;
+}
+
+/* ============ 抽屉 ============ */
+.drawer {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  max-height: 82%;
+  background: rgba(255, 253, 248, .92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -12px 40px rgba(30, 28, 26, .16);
+  transform: translateY(105%);
+  transition: transform .32s var(--ease);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+}
+.drawer.open { transform: translateY(0); }
+/* 抽屉收起：顶部中央圆角横条（唯一收起入口，点整条热区都触发） */
+.drawer-handle {
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 10px 0 6px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.drawer-handle::before {
+  content: "";
+  display: block;
+  width: 48px; height: 6px;
+  margin: 0 auto;
+  border-radius: 3px;
+  background: rgba(30, 28, 26, .22);
+  transition: background .18s var(--ease), width .18s var(--ease);
+}
+.drawer-handle:hover::before,
+.drawer-handle:focus-visible::before {
+  background: rgba(30, 28, 26, .38);
+  width: 56px;
+}
+.drawer-handle:focus { outline: none; }
+.drawer-handle:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.drawer-scroll {
+  overflow-y: auto;
+  padding: 8px 20px 24px;
+}
+.drawer-title {
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.field { margin-bottom: 14px; }
+.field label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-2);
+  margin-bottom: 6px;
+}
+.field-static {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-radius: 12px;
+}
+.field-amount { color: var(--accent); }
+.field-hint { font-size: 12px; color: var(--text-2); margin: -6px 0 14px; }
+.field textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  padding: 10px 12px;
+  font-size: 15px;
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+}
+.field textarea:focus { border-color: var(--gold); }
+
+.card-preview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+/* ============ 飞行卡片 ============ */
+.flyer {
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 90;
+  pointer-events: none;
+  will-change: transform;
+}
+.flyer-card-inner {
+  width: 100%; height: 100%;
+}
+.flyer .envelope { width: 100%; height: 100%; box-shadow: 0 14px 34px rgba(30, 28, 26, .22); }
+/* 纸飞机（用户素材抠图）：素材已水平翻转为机头朝右，飞行时 JS 按目标角旋转 */
+.flyer .plane-img {
+  width: 100%; height: 100%;
+  display: block;
+  filter: drop-shadow(0 10px 20px rgba(30, 28, 26, .28));
+}
+
+/* ============ 悬浮心愿卡（展开：撕边纸 + 木夹素材） ============ */
+.card-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-butter); /* 展开后文字全部用郑庆科黄油体 */
+}
+.card-modal-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .2);
+  animation: fadeIn .24s var(--ease);
+}
+.card-scene {
+  position: relative;
+  width: min(540px, 94vw); /* 原始素材（720×671）整幅居中于页面 */
+  padding: 14px 0 0 0;
+  z-index: 1;
+  animation: cardExpand .48s var(--ease);
+}
+.paper-card { position: relative; filter: drop-shadow(0 16px 32px rgba(30, 28, 26, .18)); }
+/* 第11轮：信纸素材整体右移 10%（素材右侧 x595-720 为透明区，右移不裁内容、文案按钮保持页面居中不动） */
+.paper-img { display: block; width: 100%; height: auto; transform: translateX(10%); }
+.paper-text {
+  position: absolute;
+  left: 21%; right: 21%; /* 左右对称：文案/按钮组居中于素材中轴（信纸主体 x 1.7-82.6%，均在纸面上） */
+  top: 32%; bottom: 44%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  opacity: 0;
+  animation: riseIn .4s var(--ease) .48s forwards;
+}
+.paper-title { font-size: 20px; line-height: 1.3; letter-spacing: 2px; color: #4A3F33; }
+.gift-blessing {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #5B5146;
+}
+.paper-text .btn { min-width: 160px; height: 36px; font-size: 13px; }
+
+.card-close {
+  position: absolute;
+  top: 18px; right: 22px;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.35);
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cardExpand {
+  from { clip-path: inset(48% 0 48% 0); opacity: 0; }
+  to { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+/* ============ 挑礼物悬浮卡（信纸背景，页面居中，同展开心愿卡位置） ============ */
+.flow-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-butter);
+}
+.flow-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .2);
+  animation: fadeIn .24s var(--ease);
+}
+.flow-scene { position: relative; z-index: 1; }
+.flow-paper {
+  position: relative;
+  width: min(400px, 86vw);
+  min-height: calc(min(400px, 86vw) * 720 / 655);
+  max-height: 88vh;
+  background: url("assets/img/paper-line.png") no-repeat center / 100% 100%;
+  filter: drop-shadow(0 16px 32px rgba(30, 28, 26, .18));
+  padding: 22% 5% 11% 18%; /* 对齐信纸可写区：x 18~95%，y 20~91% */
+  display: flex;
+  flex-direction: column;
+  animation: flowIn .38s var(--ease);
+}
+.flow-content { overflow-y: auto; min-height: 0; }
+/* 三卡列表 / 详情 / 订单确认：信纸背景收起，用素色卡片 */
+.flow-paper.plain {
+  width: min(600px, 94vw);
+  min-height: 0;
+  background: var(--card-bg);
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  box-shadow: 0 16px 40px rgba(30, 28, 26, .16);
+  filter: none;
+  padding: 20px 20px 22px;
+  animation: flowIn .3s var(--ease);
+}
+@keyframes flowIn {
+  from { opacity: 0; transform: translateY(16px) scale(.97); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 商品详情页（第11轮）：黄红渐变底素材，列宽贴合实物图，图片全露出 + 悬浮 */
+.flow-paper.detail-paper {
+  width: min(440px, 94vw); /* 第12轮：稍加宽，列内禁横向滚动 */
+  background: #B8482C url("assets/img/detail-bg.jpg") center / cover no-repeat;
+  border: none;
+  box-shadow: 0 24px 56px rgba(60, 20, 8, .32);
+  padding: 16px 16px 0;
+}
+.flow-paper.detail-paper .flow-content { overflow-x: hidden; } /* 负边距操作条不出横向滚动条 */
+/* 第22轮：详情页右侧滚动条——轨道透明，滑块暖白半透明（红纸上不再露白底） */
+.flow-paper.detail-paper .flow-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 250, 240, .38) transparent;
+}
+.flow-paper.detail-paper .flow-content::-webkit-scrollbar { width: 8px; }
+.flow-paper.detail-paper .flow-content::-webkit-scrollbar-track { background: transparent; }
+.flow-paper.detail-paper .flow-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 250, 240, .38);
+  border-radius: 4px;
+}
+.flow-paper.detail-paper .detail-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1; /* 实拍方图整幅露出，不再裁切 */
+  object-fit: cover;
+  background: #EFE7DB;
+  border-radius: 18px;
+  box-shadow: 0 22px 34px rgba(60, 20, 8, .40), 0 8px 14px rgba(60, 20, 8, .26);
+  transform: translateY(-8px); /* 悬浮：脱离底面 */
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.flow-paper.detail-paper .detail-img:hover {
+  transform: translateY(-13px);
+  box-shadow: 0 30px 44px rgba(60, 20, 8, .44), 0 12px 20px rgba(60, 20, 8, .30);
+}
+.flow-paper.detail-paper .back-btn {
+  color: #FFFDF8;
+  background: rgba(60, 20, 8, .32);
+  border-radius: 12px;
+  padding: 6px 14px 6px 10px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  text-shadow: 0 1px 8px rgba(90, 25, 10, .55);
+}
+.flow-paper.detail-paper .back-btn:hover { color: #fff; }
+.flow-paper.detail-paper .detail-name {
+  color: #fff;
+  text-shadow: 0 1px 10px rgba(60, 15, 5, .6);
+}
+.flow-paper.detail-paper .detail-price {
+  color: #fff;
+  background: rgba(24, 21, 17, .82);
+  border-radius: 999px;
+  padding: 4px 12px;
+  align-self: flex-start;
+  text-shadow: none;
+}
+.flow-paper.detail-paper .prod-tag {
+  background: rgba(60, 20, 8, .30);
+  border-color: rgba(255, 253, 248, .18);
+  color: #FFF6EC;
+}
+.flow-paper.detail-paper .detail-shop,
+.flow-paper.detail-paper .detail-review {
+  color: rgba(255, 250, 240, .95);
+  text-shadow: 0 1px 6px rgba(90, 25, 10, .45);
+}
+.flow-paper.detail-paper .detail-reason { color: #FFF6EC; line-height: 1.7; }
+.flow-paper.detail-paper .detail-reason b { color: #fff; text-shadow: 0 1px 8px rgba(90, 25, 10, .55); }
+.flow-paper.detail-paper .detail-tradeoff {
+  background: rgba(60, 20, 8, .32);
+  color: rgba(255, 250, 240, .92);
+}
+.flow-paper.detail-paper .detail-action {
+  background: linear-gradient(rgba(139, 45, 25, 0), rgba(139, 45, 25, .95) 45%);
+  margin: 4px -16px 0;
+  padding: 14px 16px 16px;
+  border-radius: 0 0 20px 20px;
+}
+.flow-paper.detail-paper .detail-action .btn-primary {
+  background: #FFFDF8;
+  color: #B8482C;
+  box-shadow: 0 10px 24px rgba(60, 20, 8, .35);
+}
+.flow-paper.detail-paper .detail-action .btn-primary:active {
+  background: #F3E9DA;
+}
+
+/* ============ 提示 Toast ============ */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 60px;
+  transform: translateX(-50%);
+  background: rgba(30, 28, 26, .88);
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 22px;
+  font-size: 14px;
+  z-index: 100;
+  animation: toastIn .3s var(--ease);
+  white-space: nowrap;
+}
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* ============ 第二轮 · 问题 / 摘要 / 商品 / 详情 / 订单 ============ */
+#xiaomin-flow { width: 100%; }
+
+.quiz { display: flex; flex-direction: column; gap: 14px; }
+.quiz-step {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 与题目文字左对齐 */
+  gap: 12px;
+}
+.quiz-num { font-size: 12px; color: var(--text-2); letter-spacing: 1px; min-width: 44px; text-align: center; }
+.quiz-nav {
+  width: 30px; height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--text-2);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color .18s var(--ease), color .18s var(--ease);
+}
+.quiz-nav:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.quiz-nav:disabled { opacity: .25; cursor: default; }
+.quiz-title { font-size: 16px; font-weight: 600; line-height: 1.5; }
+.quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+.opt {
+  text-align: left;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font-size: 14px;
+  color: var(--text);
+  transition: background .14s var(--ease), border-color .14s var(--ease);
+}
+.opt:hover { background: var(--soft-red); border-color: var(--accent); }
+/* 已选中的选项（跳回/修改时可见当前答案） */
+.opt.on { background: var(--soft-red); border-color: var(--accent); color: var(--text); font-weight: 600; }
+
+.wish-input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px 12px;
+  font-size: 15px;
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+}
+.wish-input:focus { border-color: var(--gold); }
+
+.summary { display: flex; flex-direction: column; gap: 12px; }
+.summary-title { font-family: var(--font-serif); font-size: 17px; font-weight: 600; }
+/* “先按这个方向帮你找。” → 郑庆科黄油体 */
+.title-butter { font-family: var(--font-butter); font-weight: 400; font-size: 19px; letter-spacing: 1px; }
+.summary-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-chip {
+  padding: 6px 12px;
+  background: var(--soft-red);
+  color: var(--accent);
+  border-radius: 14px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.summary-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.edit-list { display: flex; flex-direction: column; gap: 8px; }
+.edit-dim {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font-size: 14px;
+}
+.edit-dim span { color: var(--text-2); flex: 0 0 auto; margin-right: 10px; }
+.edit-dim em { font-style: normal; text-align: right; color: var(--text); }
+
+.reco { display: flex; flex-direction: row; gap: 16px; width: 100%; }
+
+/* 三卡推荐：透明悬浮模式（无信纸底，卡片浮于深色遮罩上） */
+.flow-modal.dim .flow-mask { background: rgba(24, 21, 17, .58); }
+.flow-paper.float {
+  width: min(680px, 94vw);
+  min-height: 0;
+  background: none;
+  filter: none;
+  padding: 0;
+}
+.flow-paper.float .flow-content { overflow: visible; }
+.reco-head {
+  color: #fff;
+  font-size: 26px;
+  letter-spacing: 4px;
+  text-align: center;
+  margin: 0 0 18px;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, .4);
+}
+
+/* 商品卡：参考用户提供的深橄榄卡片样式 */
+.prod-card {
+  flex: 1 1 0;
+  min-width: 0;
+  /* 用户提供的渐变素材（浅香槟顶 → 深红底），cover 保住纵向渐变；
+     中段文字区加 text-shadow 保证白字可读 */
+  background: #B8482C url("assets/img/prod-card-bg.jpg") center / cover no-repeat;
+  border-radius: 22px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(20, 17, 12, .35);
+  transition: transform .18s var(--ease), box-shadow .18s var(--ease);
+  animation: cardIn .5s var(--ease) both;
+}
+/* 三张卡从左到右依次浮现 */
+.prod-card:nth-child(1) { animation-delay: .05s; }
+.prod-card:nth-child(2) { animation-delay: .21s; }
+.prod-card:nth-child(3) { animation-delay: .37s; }
+.prod-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(20, 17, 12, .45); }
+/* 实物照片顶部 62% 实显，底部渐隐透出卡片的黄红渐变底 */
+.prod-img {
+  width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #EFE7DB;
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
+}
+.prod-body { padding: 13px 14px 14px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
+.prod-name-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.prod-name { color: #fff; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; text-shadow: 0 1px 8px rgba(90, 25, 10, .55); }
+.prod-price {
+  color: #fff;
+  background: rgba(24, 21, 17, .82);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.prod-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.prod-card .prod-tag {
+  background: rgba(60, 20, 8, .30);
+  border: 1px solid rgba(255, 255, 255, .30);
+  color: rgba(255, 255, 255, .92);
+  font-size: 11px;
+}
+.btn-see {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  font-size: 13px;
+  margin-top: auto;
+  background: #FFFDF8;
+  color: #1E1C1A;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.btn-see:hover { background: #fff; }
+@keyframes cardIn { from { opacity: 0; transform: translateX(-30px); } }
+
+.detail { display: flex; flex-direction: column; gap: 12px; }
+.back-btn { align-self: flex-start; font-size: 14px; color: var(--text-2); padding: 4px 0; }
+.back-btn:hover { color: var(--text); }
+.detail-img { width: 100%; height: 260px; object-fit: cover; border-radius: 16px; background: var(--bg); display: block; }
+.detail-name { font-size: 18px; font-weight: 600; margin-top: 4px; }
+.detail-price { color: var(--accent); font-size: 20px; font-weight: 700; }
+.detail-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.prod-tag { padding: 4px 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; font-size: 12px; color: var(--text-2); }
+.detail-shop { font-size: 13px; color: var(--text-2); }
+.detail-review { font-size: 13px; color: var(--text-2); }
+.detail-reason { font-size: 14px; line-height: 1.6; }
+.detail-reason b { display: block; margin-bottom: 4px; }
+.detail-tradeoff { font-size: 12px; color: var(--text-2); background: var(--bg); border-radius: 10px; padding: 8px 10px; }
+/* 流程悬浮卡内的详情排版 */
+.flow-paper .back-btn { padding: 6px 14px 6px 2px; }
+.flow-paper .detail-img { height: 200px; }
+.flow-paper .detail-action { background: var(--card-bg); }
+.flow-paper .detail { gap: 10px; }
+.detail-action {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg);
+  padding-top: 10px;
+}
+
+.confirm { display: flex; flex-direction: column; }
+.confirm-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px 18px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+/* 第22轮：“订单确认”用郑庆科黄油体（与正文字体同源、自托管），字号略大于页内其他文字 */
+.confirm-title {
+  font-family: "ButterQK", var(--font-serif);
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.confirm-line { font-size: 15px; }
+.confirm-card .btn { margin-top: 10px; }
+
+.done { display: flex; flex-direction: column; gap: 10px; }
+.done-title { font-family: var(--font-serif); font-size: 19px; font-weight: 600; color: var(--green); }
+.done-text { font-size: 15px; line-height: 1.6; }
+
+/* ============ 心意已收下 弹窗 ============ */
+.done-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 85;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto; /* 极矮屏兜底可滚动 */
+  font-family: var(--font-butter); /* 心意已收下：郑庆科黄油体 */
+}
+.done-mask { position: fixed; inset: 0; background: rgba(24, 21, 17, .58); animation: fadeIn .24s var(--ease); }
+.done-scene {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 信封为组主体居中；补偿下方按钮占位，让信封中心正对视口中心 */
+  margin-top: 70px;
+  gap: 24px;
+  animation: flowIn .42s var(--ease);
+}
+.done-env-wrap { position: relative; }
+.done-env-img {
+  width: min(380px, 76vw); /* 第13轮新抠图素材（奶油信纸+火漆印），srcset 提供 380w/501w 两档避免缩小重采样白边 */
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 20px 40px rgba(20, 15, 10, .35));
+}
+/* 标题叠在信封素材上层：奶油信纸下部干净区（火漆印在 55-60%），用火漆同源深红字 */
+.done-headline {
+  position: absolute;
+  top: 50%; left: 0; right: 0; /* 第15轮：白字 + 上移20%（70%→50%） */
+  text-align: center;
+  color: #FFFFFF; /* 第15轮：用户指定改为白色 */
+  font-family: var(--font-title-hand); /* 第13轮：PingFangLiuAngLeTianTi（附件与已托管字体 md5 一致） */
+  font-size: 30px;
+  letter-spacing: 8px;
+  text-shadow: 0 1px 2px rgba(60, 42, 20, .35); /* 白字压深色投影增强与牛皮纸的分离度 */
+}
+.btn-done-home {
+  font-family: var(--font-butter); /* 返回首页：郑庆科黄油体（第8轮附件字体） */
+  height: 46px;
+  padding: 0 34px;
+  font-size: 17px;
+  letter-spacing: 3px;
+  border-radius: 999px;
+  background: #FFFDF8;
+  color: #1E1C1A;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(20, 15, 10, .3);
+  transition: transform .16s var(--ease), background .16s var(--ease);
+}
+.btn-done-home:hover { background: #fff; transform: translateY(-1px); }
+
+/* ============ 底部结果条 ============ */
+.result-bar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 70;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  justify-content: center;
+  padding: 12px 20px;
+  background: var(--card-bg);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -6px 20px rgba(30, 28, 26, .08);
+  font-size: 13px;
+  color: var(--text-2);
+}
+.result-bar b { color: var(--text); font-weight: 700; margin-right: 2px; }
+
+/* ============ 非激活侧 ============ */
+/* 桌面端：变暗 + 缩小的处理在 @media(min-width) 定义 */
+
+/* ============ 响应式 ============ */
+@media (max-width: 767px) {
+  /* 移动端：单栏 + 角色切换 */
+  .dual { position: relative; height: 100dvh; }
+  .panel { position: absolute; inset: 0; padding: 0; }
+  .panel.panel-inactive { display: none; }
+  .panel.panel-active { display: flex; }
+  .divider { display: none; }
+
+  /* 展开心愿卡：小屏压缩排版（位移公式按 96vw 重算，卡片不溢出） */
+  .card-scene {
+    width: 96vw;
+    padding: 10px 0 0 0;
+  }
+  .paper-text { top: 30%; bottom: 43%; left: 21%; right: 21%; gap: 4px; }
+  .paper-title { font-size: 16px; letter-spacing: 1px; }
+  .gift-blessing { font-size: 12px; line-height: 1.5; }
+  .paper-text .btn { min-width: 140px; height: 28px; font-size: 12px; }
+
+  .phone {
+    --ph: 100dvh;
+    height: 100dvh;
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    background: rgba(255, 253, 248, .72);
+  }
+
+  .role-switch {
+    display: flex;
+    position: fixed;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 70;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 3px;
+    box-shadow: 0 6px 18px rgba(30, 28, 26, .12);
+  }
+  .role-tab {
+    padding: 6px 18px;
+    border-radius: 16px;
+    font-size: 14px;
+    color: var(--text-2);
+    transition: background .18s var(--ease), color .18s var(--ease);
+  }
+  .role-tab.is-active { background: var(--accent); color: #fff; }
+
+  .launch-actions .btn { min-width: 240px; }
+
+  /* 移动端：四幕动画适配 */
+  .insp-stage { padding: 76px 20px 84px; align-items: flex-start; }
+  /* 移动端：前三幕恢复上下堆叠、居中对齐 */
+  .act.is-active:not(.act-final) {
+    display: block;
+    max-width: 100%;
+    text-align: center;
+  }
+  .act.is-active:not(.act-final) .act-figure { margin-bottom: 18px; }
+  .act.is-active:not(.act-final) .fig-words { justify-content: center; }
+  #insp-stage article[data-act="1"] .fig-words { margin-left: 0; }
+  #insp-stage article[data-act="3"] .fig-word:nth-child(3) { margin-left: 0; }
+  #insp-stage article[data-act="2"] .fig-words-2 .fig-word:nth-child(3) { margin-left: 0; }
+  .act.is-active:not(.act-final) .act-title-q { margin: 0 auto; }
+  .act.is-active:not(.act-final) .act-continue { margin-top: 24px; }
+  .act-figure { margin-bottom: 18px; }
+  .fig-svg { width: 240px; }
+  .act-title { font-size: 30px; }
+  .act-title-lg { font-size: 36px; }
+  .act-title-q { font-size: 21px; line-height: 1.6; }
+  .act-sub, .act-line { font-size: 15px; }
+  .act-purpose { font-size: 18px; }
+  .fig-word { font-size: 14px; padding: 4px 11px; }
+  .fig-words-2 .fig-word, .fig-words-3 .fig-word { font-size: 13px; }
+  .act-dots { bottom: 20px; }
+  .skip-btn { top: 16px; right: 16px; }
+  .site-back { top: 16px; left: 16px; }
+
+  /* 移动端：挑礼物悬浮卡 / 三卡列表压缩 */
+  .flow-paper { width: 88vw; }
+  .flow-paper.plain { width: 94vw; padding: 16px 16px 18px; }
+  .flow-paper.float { width: 94vw; }
+  .reco-head { font-size: 20px; letter-spacing: 2px; margin-bottom: 12px; }
+  .reco { gap: 8px; }
+  .prod-card { flex-basis: 0; border-radius: 16px; }
+  .prod-img { height: auto; }
+  .prod-body { padding: 8px 8px 10px; gap: 6px; }
+  .prod-name { font-size: 11.5px; }
+  .prod-price { font-size: 10px; padding: 2px 7px; }
+  .prod-tags { display: none; }
+  .btn-see { height: 28px; font-size: 11px; }
+  .flow-paper .detail-img { height: 160px; }
+  .flow-paper .detail-name { font-size: 16px; }
+  .flow-paper .detail-price { font-size: 17px; }
+
+  /* 移动端：心意已收下弹窗 */
+  .done-headline { font-size: 24px; letter-spacing: 5px; }
+  .done-env-img { width: 70vw; }
+  .done-scene { margin-top: 52px; gap: 16px; }
+  .btn-done-home { height: 40px; padding: 0 26px; font-size: 15px; letter-spacing: 2px; }
+}
+
+@media (min-width: 768px) {
+  .panel.panel-inactive {
+    filter: brightness(.38) saturate(.35);
+    transform: scale(.96);
+    pointer-events: none;
+  }
+  .panel.panel-inactive .drawer { display: none; }
+}
+
+/* ============ 减弱动效 ============ */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .flyer { display: none !important; }
+  .try-tip { animation: none !important; }
+
+  /* 标题：改为 500ms 淡入，不执行擦除动画 */
+  .brand-wrap { opacity: 0; animation: brandFade .5s ease forwards !important; }
+  .brand-dust-layer { display: none !important; }
+  #dustEraser { animation: none !important; }
+  .brand-grain-layer { animation: none !important; opacity: .1; }
+
+  /* 四幕：直接显示，不做逐字/上移 */
+  .act-title .ch { opacity: 1; transform: none; }
+  .act-sub, .act-line, .act-lead, .act-purpose, .act-ai,
+  .act-continue, .act-actions, .fig-word { opacity: 1; }
+}
+@keyframes brandFade { from { opacity: 0; } to { opacity: 1; } }
+/* ============ 三卡推荐 · 换一批（第25轮：池内随机 + 换一批） ============ */
+.reco-swap {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+.btn-swap {
+  background: rgba(255, 253, 248, .14);
+  color: #fff;
+  border: 1px solid rgba(255, 253, 248, .45);
+  padding: 10px 34px;
+  border-radius: 999px;
+  font-size: 15px;
+  letter-spacing: 3px;
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  backdrop-filter: blur(8px) saturate(140%);
+  transition: background .18s ease, transform .18s ease;
+}
+.btn-swap:hover { background: rgba(255, 253, 248, .26); transform: translateY(-1px); }
+.btn-swap:active { transform: translateY(0); }
+@media (max-width: 767px) {
+  .reco-swap { margin-top: 12px; }
+  .btn-swap { padding: 8px 26px; font-size: 14px; letter-spacing: 2px; }
+}

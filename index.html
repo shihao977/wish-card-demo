@@ -1,0 +1,441 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>心愿卡</title>
+<link rel="icon" type="image/png" href="assets/img/card-icon.png">
+<link rel="stylesheet" href="styles.css?v=51">
+</head>
+<body>
+
+<!-- ============ 全站返回按钮（页面层级，不在手机框内） ============ -->
+<button class="site-back hidden" id="site-back" type="button" aria-label="返回">‹&nbsp;返回</button>
+
+<!-- ============ 背景音乐开关（页面正上方） ============ -->
+<button class="bgm-toggle" id="bgm-toggle" type="button" aria-pressed="true" aria-label="背景音乐开关" title="背景音乐">
+  <svg class="icon-on" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 9v6h3l5 4V5L7 9H4z"/>
+    <path d="M15.4 8.6a4.6 4.6 0 0 1 0 6.8"/>
+    <path d="M18 6a8.2 8.2 0 0 1 0 12"/>
+  </svg>
+  <svg class="icon-off" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 9v6h3l5 4V5L7 9H4z"/>
+    <path d="M16 9.5l5 5M21 9.5l-5 5"/>
+  </svg>
+</button>
+
+<!-- 音频：点击声 + 背景音乐 -->
+<audio id="sfx-click" src="assets/audio/click.mp3" preload="auto"></audio>
+<audio id="bgm" src="assets/audio/bgm.mp3" loop preload="auto"></audio>
+
+<div id="app">
+
+  <!-- ============ 启动页 ============ -->
+  <section class="view is-active" id="view-launch" data-view="launch">
+    <div class="launch-inner">
+      <div class="brand-wrap reveal" id="brand-wrap">
+        <svg class="brand-title" viewBox="0 0 420 190" role="img" aria-label="心愿卡">
+          <defs>
+            <!-- 标题配色：红黑渐变（左黑 → 右红，配合从左到右显现） -->
+            <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#181512"/>
+              <stop offset="42%" stop-color="#522017"/>
+              <stop offset="100%" stop-color="#D9483B"/>
+            </linearGradient>
+            <!-- 笨拙手写：低频扰动让笔画歪斜、起毛；叠加轻微模糊 = 粉笔模糊感 -->
+            <filter id="chalkInk" x="-35%" y="-55%" width="170%" height="210%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.045 0.085" numOctaves="2" seed="7" result="w"/>
+              <feDisplacementMap in="SourceGraphic" in2="w" scale="6.5" xChannelSelector="R" yChannelSelector="G" result="d"/>
+              <feGaussianBlur in="d" stdDeviation="0.85"/>
+            </filter>
+            <!-- 粉笔晕染：更重的模糊，做字形外缘的粉笔灰 -->
+            <filter id="chalkHalo" x="-45%" y="-65%" width="190%" height="230%">
+              <feGaussianBlur stdDeviation="2.6"/>
+            </filter>
+            <!-- 粉笔颗粒：字形边缘细碎缺口 + 毛刺 -->
+            <filter id="chalkGrain" x="-25%" y="-45%" width="150%" height="190%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="9" result="g"/>
+              <feDisplacementMap in="SourceGraphic" in2="g" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+            <!-- 擦除边界：低频横向扰动，制造不规则粉笔擦痕 -->
+            <filter id="chalkEdge" x="-30%" y="-45%" width="160%" height="190%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.02 0.7" numOctaves="2" seed="4" result="e"/>
+              <feDisplacementMap in="SourceGraphic" in2="e" scale="30" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+            <!-- 颗粒噪点（灰度），仅叠加在字形上 -->
+            <filter id="grainNoise" x="-5%" y="-5%" width="110%" height="110%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" result="t"/>
+              <feColorMatrix in="t" type="saturate" values="0"/>
+            </filter>
+            <!-- 擦除遮罩：白=保留粉笔灰，黑=已擦除。擦除块从左侧向右扫过 -->
+            <mask id="dustMask" maskUnits="userSpaceOnUse" x="-40" y="-40" width="500" height="270">
+              <rect x="-40" y="-40" width="500" height="270" fill="#ffffff"/>
+              <rect id="dustEraser" x="-520" y="-40" width="520" height="270" fill="#000000" filter="url(#chalkEdge)"/>
+            </mask>
+            <!-- 显现遮罩：与擦除相反，白=已显现。用于让晕染层与底层字同步从左向右出现 -->
+            <mask id="showMask" maskUnits="userSpaceOnUse" x="-40" y="-40" width="500" height="270">
+              <rect x="-40" y="-40" width="500" height="270" fill="#000000"/>
+              <rect id="showEraser" x="-520" y="-40" width="520" height="270" fill="#ffffff" filter="url(#chalkEdge)"/>
+            </mask>
+            <mask id="grainMask" maskUnits="userSpaceOnUse" x="0" y="0" width="420" height="190">
+              <text x="210" y="120" text-anchor="middle" class="brand-text" style="fill:#ffffff" filter="url(#chalkInk)"><tspan rotate="-5" dy="4">心</tspan><tspan rotate="3" dy="-3">愿</tspan><tspan rotate="-5" dy="6">卡</tspan></text>
+            </mask>
+          </defs>
+
+          <!-- 晕染层：字形外缘的粉笔灰（未擦除前被粉笔灰覆盖，擦除后随字露出） -->
+          <g class="brand-halo" mask="url(#showMask)" aria-hidden="true">
+            <text x="210" y="120" text-anchor="middle" class="brand-text" fill="url(#titleGrad)" filter="url(#chalkHalo)"><tspan rotate="-5" dy="4">心</tspan><tspan rotate="3" dy="-3">愿</tspan><tspan rotate="-5" dy="6">卡</tspan></text>
+          </g>
+
+          <!-- 覆盖层：浅色粉笔灰（被擦除后露出底层字） -->
+          <g class="brand-dust-layer" mask="url(#dustMask)">
+            <text x="210" y="120" text-anchor="middle" class="brand-dust-text" id="brand-dust-text"><tspan rotate="-5" dy="4">心</tspan><tspan rotate="3" dy="-3">愿</tspan><tspan rotate="-5" dy="6">卡</tspan></text>
+          </g>
+
+          <!-- 已显现区：底层字 + 颗粒 + 下划线，随擦除从左向右出现 -->
+          <g class="brand-shown" mask="url(#showMask)">
+            <text x="210" y="120" text-anchor="middle" class="brand-text" filter="url(#chalkInk)"><tspan rotate="-5" dy="4">心</tspan><tspan rotate="3" dy="-3">愿</tspan><tspan rotate="-5" dy="6">卡</tspan></text>
+            <!-- 粉笔颗粒叠加（仅限字形内） -->
+            <g class="brand-grain-layer" mask="url(#grainMask)" aria-hidden="true">
+              <rect x="0" y="0" width="420" height="190" filter="url(#grainNoise)"/>
+            </g>
+            <path class="brand-underline" d="M118 150 C168 160 258 160 300 150"/>
+          </g>
+        </svg>
+      </div>
+      <p class="launch-sub">送礼不必猜，心意也不用说破。</p>
+      <div class="launch-actions">
+        <button class="btn btn-secondary" data-goto="inspiration">灵感来源</button>
+        <button class="btn btn-primary" data-goto="experience">开始体验</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 灵感来源页（四幕动画） ============ -->
+  <section class="view" id="view-inspiration" data-view="inspiration">
+    <div class="insp-stage" id="insp-stage">
+      <button class="skip-btn" id="insp-skip" type="button">跳过</button>
+
+      <!-- 第一幕：送礼人 -->
+      <article class="act" data-act="1">
+        <div class="act-figure">
+          <svg viewBox="0 0 340 200" class="fig-svg" aria-hidden="true">
+            <g class="ink" transform="translate(26,0)">
+              <circle cx="66" cy="64" r="17"/>
+              <path d="M66 81 C56 100 54 122 54 148"/>
+              <path d="M54 148 L42 180"/>
+              <path d="M54 148 L68 180"/>
+              <path d="M58 92 L90 104"/>
+              <path d="M58 100 L34 116"/>
+            </g>
+            <g class="accent" transform="translate(26,0)">
+              <rect x="90" y="92" width="34" height="28" rx="3"/>
+              <path d="M90 102 h34"/>
+              <path d="M107 92 v28"/>
+            </g>
+            <g class="ink" transform="translate(-26,0)">
+              <circle cx="256" cy="66" r="17"/>
+              <path d="M256 83 C266 102 268 124 268 150"/>
+              <path d="M268 150 L256 182"/>
+              <path d="M268 150 L282 182"/>
+              <path d="M262 96 L236 108"/>
+              <path d="M262 104 L290 114"/>
+            </g>
+            <g class="q-mark" transform="translate(-26,0)">
+              <text x="232" y="40">?</text>
+              <text x="256" y="28">?</text>
+              <text x="280" y="40">?</text>
+            </g>
+          </svg>
+          <div class="fig-words">
+            <span class="fig-word">送什么？</span>
+            <span class="fig-word">TA 会喜欢吗？</span>
+            <span class="fig-word">会不会买错？</span>
+          </div>
+        </div>
+        <div class="act-copy">
+          <h2 class="act-title"><span class="ch" style="--i:0">作</span><span class="ch" style="--i:1">为</span><span class="ch" style="--i:2">送</span><span class="ch" style="--i:3">礼</span><span class="ch" style="--i:4">人</span></h2>
+          <p class="act-sub">你有没有过这样的瞬间？</p>
+          <p class="act-line" style="--d:1.5s">明明想送出一份有心意的礼物，却不知道送什么。</p>
+          <p class="act-line" style="--d:1.72s">不知道对方喜欢什么，也不知道自己的心意会不会被喜欢。</p>
+        </div>
+        <button class="btn btn-primary act-continue" type="button">继续</button>
+      </article>
+
+      <!-- 第二幕：收礼人 -->
+      <article class="act" data-act="2">
+        <div class="act-figure">
+          <svg viewBox="0 0 340 200" class="fig-svg" aria-hidden="true">
+            <g class="ink">
+              <circle cx="88" cy="70" r="17"/>
+              <path d="M88 87 C80 106 80 128 80 152"/>
+              <path d="M80 152 L68 184"/>
+              <path d="M80 152 L94 184"/>
+              <path d="M82 98 L108 108"/>
+              <path d="M82 106 L60 118"/>
+            </g>
+            <g class="accent">
+              <rect x="110" y="22" width="138" height="42" rx="21"/>
+              <path d="M138 64 L130 80 L152 64 Z"/>
+            </g>
+            <text class="bubble-text" x="179" y="49" text-anchor="middle">你想要什么？</text>
+            <g class="ink">
+              <circle cx="260" cy="70" r="17"/>
+              <path d="M260 87 C268 106 268 128 268 152"/>
+              <path d="M268 152 L256 184"/>
+              <path d="M268 152 L282 184"/>
+              <path d="M258 100 L238 114"/>
+            </g>
+          </svg>
+          <div class="fig-words fig-words-2">
+            <span class="fig-word">我说了会不会显得太直接？</span>
+            <span class="fig-word">TA 会不会有压力？</span>
+            <span class="fig-word">不喜欢怎么办？</span>
+          </div>
+        </div>
+        <div class="act-copy">
+          <h2 class="act-title"><span class="ch" style="--i:0">作</span><span class="ch" style="--i:1">为</span><span class="ch" style="--i:2">收</span><span class="ch" style="--i:3">礼</span><span class="ch" style="--i:4">人</span></h2>
+          <p class="act-sub">当对方问你“想要什么”时，你会不会犹豫？</p>
+          <p class="act-line" style="--d:1.5s">怕直接说显得计较，怕对方有购买压力。</p>
+          <p class="act-line" style="--d:1.72s">也怕自己收到后不喜欢，还要假装开心。</p>
+        </div>
+        <button class="btn btn-primary act-continue" type="button">继续</button>
+      </article>
+
+      <!-- 第三幕：被一篇真诚的种草笔记打动后（问句作主标题） -->
+      <article class="act" data-act="3">
+        <div class="act-figure">
+          <svg viewBox="0 0 340 200" class="fig-svg" aria-hidden="true">
+            <g class="ink">
+              <rect x="122" y="12" width="98" height="176" rx="16"/>
+              <path d="M152 26 h38"/>
+            </g>
+            <g class="accent">
+              <rect x="134" y="40" width="74" height="60" rx="8"/>
+              <path d="M142 58 h58 M142 72 h58 M142 86 h40"/>
+            </g>
+            <g class="ink thin">
+              <path d="M134 118 h74 M134 132 h74 M134 146 h50"/>
+              <path d="M134 160 h74"/>
+            </g>
+          </svg>
+          <div class="fig-words fig-words-3">
+            <span class="fig-word">不够知名，会不会不够体面？</span>
+            <span class="fig-word">真的很适合 TA 吗？</span>
+            <span class="fig-word">送出去会不会有风险？</span>
+          </div>
+        </div>
+        <div class="act-copy">
+          <h2 class="act-title act-title-q"><span class="ch" style="--i:0">被</span><span class="ch" style="--i:1">一</span><span class="ch" style="--i:2">篇</span><span class="ch" style="--i:3">真</span><span class="ch" style="--i:4">诚</span><span class="ch" style="--i:5">的</span><span class="ch" style="--i:6">种</span><span class="ch" style="--i:7">草</span><span class="ch" style="--i:8">笔</span><span class="ch" style="--i:9">记</span><span class="ch" style="--i:10">打</span><span class="ch" style="--i:11">动</span><span class="ch" style="--i:12">后</span><span class="ch" style="--i:13">，</span><br><span class="ch" style="--i:14">你</span><span class="ch" style="--i:15">也</span><span class="ch" style="--i:16">会</span><span class="ch" style="--i:17">犹</span><span class="ch" style="--i:18">豫</span><span class="ch" style="--i:19">吗</span><span class="ch" style="--i:20">？</span></h2>
+          <p class="act-line" style="--d:1.5s">它可能不是大众熟知的品牌，会不会不够正式？</p>
+          <p class="act-line" style="--d:1.72s">质量真的靠谱吗？万一对方不喜欢，又该怎么办？</p>
+        </div>
+        <button class="btn btn-primary act-continue" type="button">继续</button>
+      </article>
+
+      <!-- 第四幕：心愿卡来了 -->
+      <article class="act act-final" data-act="4">
+        <div class="act-copy">
+          <p class="act-lead">如果你也有过这些顾虑，</p>
+          <h2 class="act-title act-title-lg"><span class="ch" style="--i:0">心</span><span class="ch" style="--i:1">愿</span><span class="ch" style="--i:2">卡</span><span class="ch" style="--i:3">来</span><span class="ch" style="--i:4">了</span><span class="ch" style="--i:5">。</span></h2>
+          <p class="act-purpose">让送礼人不必猜，让收礼人不必为难。</p>
+          <p class="act-ai">AI 不替我们做决定，只希望将说不清的需求整理清楚，让心意更准确地连接到合适的平台商品</p>
+        </div>
+        <div class="act-actions">
+          <button class="btn btn-primary" data-goto="experience">开始体验</button>
+          <button class="btn btn-secondary" id="insp-replay" type="button">再看一遍</button>
+        </div>
+      </article>
+
+      <div class="act-dots" id="act-dots">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 双视角体验 ============ -->
+  <section class="view" id="view-experience" data-view="experience">
+    <div class="role-switch" id="role-switch">
+      <button class="role-tab is-active" data-role="ajie" type="button">阿杰</button>
+      <button class="role-tab" data-role="xiaomin" type="button">小敏</button>
+    </div>
+    <div class="dual" id="dual">
+
+      <!-- 阿杰视角 -->
+      <div class="panel panel-ajie panel-active" data-role="ajie" id="panel-ajie">
+        <div class="phone">
+          <div class="phone-head">
+            <button class="ic-btn" type="button" aria-label="返回">
+              <svg viewBox="0 0 24 24"><path d="M15 5 L8 12 L15 19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="avatar avatar-min">敏</div>
+            <div class="phone-title">小敏</div>
+            <button class="ic-btn" type="button" aria-label="更多">
+              <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="19" cy="12" r="1.7" fill="currentColor"/></svg>
+            </button>
+          </div>
+
+          <div class="phone-body" id="chat-ajie"></div>
+
+          <div class="phone-foot">
+            <div class="try-tip hidden" id="try-tip">点击尝试</div>
+            <div class="quick-bar">
+              <button class="tool-card" id="btn-open-drawer" type="button">
+                <svg viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 11.5h17M12 7v12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <span>心愿卡</span>
+              </button>
+              <span class="quick-pill" role="presentation"><i class="em">👍</i>棒</span>
+              <span class="quick-pill" role="presentation"><i class="em">😂</i>笑哭了</span>
+              <span class="quick-pill" role="presentation"><i class="em">🥰</i>心眼</span>
+            </div>
+            <div class="input-row">
+              <button class="ic-btn tool" type="button" aria-label="语音">
+                <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 12a6 6 0 0 0 12 0M12 18v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </button>
+              <div class="input-box"><input type="text" placeholder="发消息..." disabled></div>
+              <button class="ic-btn tool" type="button" aria-label="表情">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 14.5c.9 1.2 2.1 1.8 3.5 1.8s2.6-.6 3.5-1.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="10" r="1.2" fill="currentColor"/><circle cx="15" cy="10" r="1.2" fill="currentColor"/></svg>
+              </button>
+              <button class="ic-btn tool" type="button" aria-label="加号">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- 委托抽屉 -->
+          <div class="drawer" id="drawer">
+            <div class="drawer-handle" id="drawer-handle" role="button" aria-label="收起抽屉，返回聊天" title="收起"></div>
+            <div class="drawer-scroll">
+              <div class="drawer-step" id="drawer-form">
+                <h3 class="drawer-title">阿杰，想送点什么？</h3>
+                <div class="field">
+                  <label>收礼人</label>
+                  <div class="field-static">小敏</div>
+                </div>
+                <div class="field">
+                  <label>心愿额度</label>
+                  <div class="field-static field-amount">¥500</div>
+                </div>
+                <p class="field-hint">仅用于支付本次礼物，未使用部分将会返回。</p>
+                <div class="field">
+                  <label>观察</label>
+                  <textarea id="input-observe" rows="3">她最近总在加班，说想开始运动，但一直没时间。</textarea>
+                </div>
+                <div class="field">
+                  <label>祝福</label>
+                  <textarea id="input-bless" rows="3">生日快乐。最近辛苦了，想送你一件真正喜欢的东西。</textarea>
+                </div>
+                <button class="btn btn-primary btn-block" id="btn-generate" type="button">生成心愿卡</button>
+              </div>
+
+              <div class="drawer-step hidden" id="drawer-preview">
+                <div class="card-preview">
+                  <div id="preview-card"></div>
+                </div>
+                <button class="btn btn-primary btn-block" id="btn-pay" type="button">支付 ¥500 并发送</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 小敏视角 -->
+      <div class="panel panel-xiaomin panel-inactive" data-role="xiaomin" id="panel-xiaomin">
+        <div class="phone">
+          <div class="phone-head">
+            <button class="ic-btn" type="button" aria-label="返回">
+              <svg viewBox="0 0 24 24"><path d="M15 5 L8 12 L15 19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="avatar avatar-jie">杰</div>
+            <div class="phone-title">阿杰</div>
+            <button class="ic-btn" type="button" aria-label="更多">
+              <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="19" cy="12" r="1.7" fill="currentColor"/></svg>
+            </button>
+          </div>
+
+          <div class="phone-body" id="chat-xiaomin">
+            <div id="xiaomin-flow"></div>
+          </div>
+
+          <div class="phone-foot">
+            <div class="quick-bar">
+              <span class="quick-pill" role="presentation"><i class="em">👍</i>棒</span>
+              <span class="quick-pill" role="presentation"><i class="em">😂</i>笑哭了</span>
+              <span class="quick-pill" role="presentation"><i class="em">🥰</i>心眼</span>
+              <span class="quick-pill" role="presentation"><i class="em">🙏</i>感谢</span>
+            </div>
+            <div class="input-row">
+              <button class="ic-btn tool" type="button" aria-label="语音">
+                <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 12a6 6 0 0 0 12 0M12 18v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </button>
+              <div class="input-box"><input type="text" placeholder="发消息..." disabled></div>
+              <button class="ic-btn tool" type="button" aria-label="表情">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 14.5c.9 1.2 2.1 1.8 3.5 1.8s2.6-.6 3.5-1.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="10" r="1.2" fill="currentColor"/><circle cx="15" cy="10" r="1.2" fill="currentColor"/></svg>
+              </button>
+              <button class="ic-btn tool" type="button" aria-label="加号">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<!-- 飞行中的卡片（纸飞机） -->
+<div class="flyer hidden" id="flyer"></div>
+
+<!-- 悬浮心愿卡（全屏居中的遮罩层，无翻转，窄到高展开） -->
+<div class="card-modal hidden" id="card-modal">
+  <div class="card-modal-mask" data-close></div>
+  <div class="card-scene" id="card-scene">
+    <div class="paper-card">
+      <img class="paper-img" src="assets/img/card-open.png" alt="展开的心愿卡">
+      <div class="paper-text">
+        <div class="paper-title">来自阿杰の心愿卡</div>
+        <p class="gift-blessing" id="gift-blessing">生日快乐。最近辛苦了，想送你一件真正喜欢的东西。</p>
+        <button class="btn btn-primary" id="btn-start-gift" type="button">开始选礼物</button>
+      </div>
+    </div>
+  </div>
+  <button class="card-close" id="card-close" type="button" aria-label="关闭">×</button>
+</div>
+
+<!-- 挑礼物悬浮卡（信纸背景，与展开心愿卡同位置） -->
+<div class="flow-modal hidden" id="flow-modal">
+  <div class="flow-mask"></div>
+  <div class="flow-scene">
+    <div class="flow-paper" id="flow-paper">
+      <div class="flow-content" id="flow-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 心意已收下 弹窗（信封抠图素材 + 返回首页） -->
+<div class="done-modal hidden" id="done-modal">
+  <div class="done-mask"></div>
+  <div class="done-scene">
+    <div class="done-env-wrap">
+      <img class="done-env-img" src="assets/img/done-envelope.png?v=42" srcset="assets/img/done-envelope-380.png?v=42 380w, assets/img/done-envelope.png?v=42 482w" sizes="(max-width: 767px) 70vw, 380px" alt="心意已收下信封">
+      <div class="done-headline">心意已收下</div>
+    </div>
+    <button class="btn-done-home" id="btn-done-home" type="button">返回首页</button>
+  </div>
+</div>
+
+<!-- 底部结果条 -->
+<div class="result-bar hidden" id="result-bar"></div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="app.js?v=51"></script>
+</body>
+</html>

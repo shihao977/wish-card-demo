@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="助眠香薰机">
+  <rect width="400" height="300" fill="#EFE7DB"/>
+  <!-- 香雾 -->
+  <path d="M178 118 q-12 -18 4 -34 q16 -16 4 -34" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" opacity=".8"/>
+  <path d="M214 124 q-10 -16 3 -30 q14 -14 3 -30" fill="none" stroke="#FBF5E9" stroke-width="8" stroke-linecap="round" opacity=".65"/>
+  <path d="M244 130 q-8 -12 2 -24" fill="none" stroke="#FBF5E9" stroke-width="7" stroke-linecap="round" opacity=".5"/>
+  <!-- 影子 -->
+  <ellipse cx="200" cy="238" rx="86" ry="11" fill="#D9CBBA"/>
+  <!-- 雾化口 -->
+  <rect x="182" y="122" width="36" height="10" rx="5" fill="#8C6A50"/>
+  <!-- 陶瓷上盖 -->
+  <path d="M156 132 q44 -30 88 0 l-6 18 h-76 Z" fill="#D9C9AF"/>
+  <!-- 机身 -->
+  <path d="M156 150 h88 l14 70 q3 14 -12 14 h-92 q-15 0 -12 -14 Z" fill="#EDE4D3"/>
+  <rect x="150" y="212" width="100" height="22" rx="8" fill="#D9C9AF"/>
+  <!-- 指示灯 -->
+  <circle cx="200" cy="223" r="5" fill="#C7A56A"/>
+  <circle cx="200" cy="223" r="9" fill="#C7A56A" opacity=".35"/>
+  <!-- 侧面纹理 -->
+  <g stroke="#E0D4BD" stroke-width="3" stroke-linecap="round">
+    <line x1="172" y1="162" x2="168" y2="206"/>
+    <line x1="184" y1="162" x2="181" y2="206"/>
+  </g>
+</svg>

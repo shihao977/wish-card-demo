@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="暖光睡眠灯">
+  <rect width="400" height="300" fill="#EFE7DB"/>
+  <!-- 柔光 -->
+  <circle cx="200" cy="158" r="112" fill="#F7ECD4" opacity=".55"/>
+  <circle cx="200" cy="158" r="78" fill="#F6E3BC" opacity=".75"/>
+  <!-- 灯罩（陶土红） -->
+  <path d="M132 170 Q132 92 200 92 Q268 92 268 170 Z" fill="#D9483B"/>
+  <path d="M132 170 h136 v8 q0 6 -6 6 h-124 q-6 0 -6 -6 Z" fill="#C13D31"/>
+  <!-- 顶环 -->
+  <rect x="192" y="78" width="16" height="16" rx="6" fill="#B08968"/>
+  <!-- 光晕下缘 -->
+  <ellipse cx="200" cy="190" rx="52" ry="7" fill="#F2D48E" opacity=".9"/>
+  <!-- 木底座 -->
+  <rect x="160" y="184" width="80" height="14" rx="7" fill="#B08968"/>
+  <rect x="176" y="198" width="48" height="42" rx="10" fill="#9C7355"/>
+  <ellipse cx="200" cy="244" rx="52" ry="9" fill="#D9CBBA"/>
+  <!-- 电源小点 -->
+  <circle cx="200" cy="218" r="4" fill="#C7A56A"/>
+</svg>

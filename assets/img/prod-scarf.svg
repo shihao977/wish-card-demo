@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="羊毛围巾">
+  <rect width="400" height="300" fill="#EFE7DB"/>
+  <!-- 影子 -->
+  <ellipse cx="200" cy="242" rx="120" ry="12" fill="#D9CBBA"/>
+  <!-- 折叠围巾主体（奶油白） -->
+  <path d="M96 118 q104 -46 208 0 q10 4 8 16 l-18 70 q-3 12 -15 8 q-91 -40 -182 0 q-12 4 -15 -8 l-18 -70 q-2 -12 12 -16 Z" fill="#F3EDE3"/>
+  <!-- 条纹（赭金 + 陶土红） -->
+  <g clip-path="url(#s)">
+    <rect x="96" y="150" width="216" height="14" fill="#C7A56A"/>
+    <rect x="96" y="184" width="216" height="10" fill="#D9483B"/>
+  </g>
+  <clipPath id="s">
+    <path d="M96 118 q104 -46 208 0 q10 4 8 16 l-18 70 q-3 12 -15 8 q-91 -40 -182 0 q-12 4 -15 -8 l-18 -70 q-2 -12 12 -16 Z"/>
+  </clipPath>
+  <!-- 流苏 -->
+  <g stroke="#C7A56A" stroke-width="4" stroke-linecap="round">
+    <line x1="120" y1="206" x2="120" y2="234"/>
+    <line x1="140" y1="212" x2="140" y2="240"/>
+    <line x1="260" y1="212" x2="260" y2="240"/>
+    <line x1="280" y1="206" x2="280" y2="234"/>
+  </g>
+  <!-- 缝线细节 -->
+  <path d="M112 132 q88 -36 176 0" fill="none" stroke="#E2D5C2" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>
+</svg>
